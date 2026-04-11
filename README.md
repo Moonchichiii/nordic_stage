@@ -23,8 +23,9 @@ Implementation begins after architecture completion.
 Nordic Stage is a scalable event platform providing:
 - Event discovery and browsing
 - Agenda and speaker/venue pages
-- Registration workflows
+- Secure ticket purchases and payments
 - User accounts with saved sessions
+- Rich media-driven event presentation
 - Editorial content via Wagtail CMS
 
 ---
@@ -38,14 +39,17 @@ Nordic Stage is a scalable event platform providing:
 | Component | Role |
 |-----------|------|
 | **NGINX** | Ingress, reverse proxy, edge caching |
-| **Next.js** | Frontend with App Router |
-| **API Client** | Typed fetch and validation |
-| **Django + DRF** | Business logic and API |
-| **Wagtail** | Editorial content API |
-| **Auth** | NextAuth.js + django-allauth |
-| **PostgreSQL** | Primary database |
+| **Next.js** | Frontend (App Router) |
+| **API Client** | Typed fetch and validation layer |
+| **Django** | Business logic and domain layer |
+| **Application API (/api/)** | Backend contract layer |
+| **Wagtail** | CMS content API (read-only to frontend) |
+| **Authentication** | NextAuth (frontend) + django-allauth (backend) |
+| **Stripe** | Payment processing and webhooks |
+| **Cloudinary** | Media storage and delivery |
+| **PostgreSQL** | System of record |
 | **Redis** | Cache, sessions, rate limiting |
-| **Observability** | Datadog, GitHub Actions, Docker |
+| **Observability** | Datadog monitoring and logging |
 
 ### Design Principles
 
@@ -55,6 +59,7 @@ Nordic Stage is a scalable event platform providing:
 - Reproducible local and deployment environments
 - Security and observability built-in
 - Milestone-driven delivery
+- External services for specialized concerns (auth, payments, media)
 
 ---
 
@@ -65,11 +70,16 @@ Nordic Stage is a scalable event platform providing:
 | Frontend | Next.js | 16.2.3 |
 | Backend | Django | 6.0.4 |
 | CMS | Wagtail | 7.4 LTS |
-| Auth | NextAuth / django-allauth | 5.x / latest |
+| API Layer | Django REST Framework | 3.15+ |
+| Frontend Auth | NextAuth / Auth.js | 5.x |
+| Backend Auth | django-allauth | latest |
+| Payments | Stripe | latest |
+| Media | Cloudinary | latest |
 | Database | PostgreSQL | 18 |
 | Cache | Redis | 7 |
 | Proxy | NGINX | 1.25+ |
 | Runtime | Docker | 24+ |
+| CI/CD | GitHub Actions | — |
 | Package Managers | Bun, uv | 1.3.12, 0.4+ |
 
 ---
@@ -90,10 +100,12 @@ nordic-stage/
 
 ## Delivery Tracks
 
-**Infrastructure** · Database, Docker, CI/CD, observability  
+**Infrastructure** · Database, Docker, NGINX, CI/CD, observability  
 **Backend** · Django core, domain models, Wagtail, API  
 **Frontend** · Next.js architecture, discovery, registration UX  
 **Authentication** · Session flow, OAuth, magic links  
+**Payments** · Stripe checkout, webhooks, order lifecycle  
+**Media** · Cloudinary integration, image/video delivery  
 
 **Total: 18 planned milestones**
 
@@ -166,6 +178,8 @@ cd apps/web && bun run dev
 - PostgreSQL and Redis support
 - Docker containerization
 - GitHub Actions CI/CD
+- Stripe payment processing and webhooks
+- Cloudinary media storage and delivery
 - Datadog observability
 
 ### Environments
