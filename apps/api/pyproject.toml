@@ -1,0 +1,70 @@
+[project]
+name = "nordic-stage-backend"
+version = "0.1.0"
+description = "Backend API and CMS for Nordic Stage"
+readme = "README.md"
+# Updated to match Local Development requirements
+requires-python = ">=3.13"
+dependencies = [
+    # Core Stack from Architecture
+    "Django>=6.0.4",
+    "wagtail>=7.3",
+    "djangorestframework>=3.15",
+    
+    # Infrastructure & Data
+    "psycopg[binary]>=3.0",
+    "python-decouple>=3.8",
+    "redis>=5.0.0",
+    "django-redis>=5.4.0",
+    
+    # External Services
+    "django-allauth>=0.63.0",
+    "stripe>=11.0.0",
+    "cloudinary>=1.41.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "ruff>=0.3",
+    "mypy>=1.9",
+    "django-stubs>=4.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 80
+# Updated target version to match Python 3.13
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+]
+ignore = []
+
+[tool.mypy]
+# Updated python version to match Python 3.13
+python_version = "3.13"
+strict = true
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-v --nomigrations"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config"]

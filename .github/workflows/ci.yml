@@ -1,0 +1,107 @@
+name: Nordic Stage CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  frontend:
+    name: Frontend Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.12
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint and Format (Biome)
+        run: bunx @biomejs/biome ci .
+
+      - name: Run Tests (Jest)
+        run: bun run test
+
+      - name: Build Next.js app
+        run: bun run build
+
+  backend:
+    name: Backend Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: nordic_test_db
+          POSTGRES_PASSWORD: testpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://postgres:testpassword@localhost:5432/nordic_test_db
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-do-not-use-in-prod
+      DEBUG: "True"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.4.x"
+          enable-cache: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Dependencies
+        run: uv sync
+
+      - name: Lint with Ruff
+        run: uv run ruff check .
+
+      - name: Check Format with Ruff
+        
+        run: uv run ruff format --check .
+
+      - name: Type Check with mypy
+        run: uv run mypy .
+
+      - name: Run Django System Checks
+        run: uv run python manage.py check
+
+      - name: Run Backend Tests (Pytest)
+        run: uv run pytest
