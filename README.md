@@ -31,8 +31,118 @@ Nordic Stage is a scalable event platform providing:
 ---
 
 ## Architecture
+```mermaid
+flowchart TD
+    subgraph External Identity Providers
+        GoogleOAuth[🟢 Google OAuth]
+        GitHubOAuth[🟢 GitHub OAuth]
+        EmailMagic[🟢 Email - Magic Links]
+    end
 
-![Architecture Overview](readme/EpicFlow.webp)
+    subgraph External Payment Provider
+        StripeExt[💳 Stripe<br/>Checkout + Webhooks]
+    end
+
+    subgraph External Media Platform
+        CloudinaryExt[🖼️ Cloudinary<br/>Storage / Transformations / CDN]
+    end
+
+    subgraph Operations
+        Datadog[📊 Datadog]
+        GHA[⚙️ GitHub Actions]
+        Docker[🐳 Docker 24+]
+    end
+
+    subgraph Infrastructure
+        NGINX[🔴 NGINX<br/>Ingress / Reverse Proxy / Edge Cache]
+    end
+
+    subgraph Data
+        Postgres[(🟢 PostgreSQL 18<br/>System of Record)]
+        Redis[(🟢 Redis 7<br/>Cache / Rate Limit / Sessions)]
+    end
+
+    subgraph "nordic-stager (Monorepo)"
+        subgraph "apps/api"
+            Wagtail[🟣 Wagtail 7.4 LTS<br/>CMS Content API]
+        end
+
+        subgraph "apps/web"
+            NextJS[🟠 Next.js 16.2.3<br/>App Router]
+            APIClient[🔴 API Client<br/>typed fetch / validation]
+            CheckoutFlow[🔴 Checkout Flow<br/>redirect to Stripe]
+            NextAuth[🟠 NextAuth / Auth.js<br/>Passwordless + Social]
+            MediaLayer[🟠 Media Rendering Layer<br/>Cloudinary delivery]
+            SessionStore[🟠 Session Store<br/>cookies + browser storage]
+        end
+
+        subgraph Backend
+            AppAPI[🟢 Application API<br/>/api/]
+            Django[🟣 Django 6.0.4<br/>Business Logic / Domain Layer]
+            StripeBack[🟢 Stripe Backend<br/>Checkout Sessions / Webhooks]
+            CloudBack[🟡 Cloudinary Backend<br/>Upload / Metadata]
+            Allauth[🟢 django-allauth<br/>Social Auth Backend]
+        end
+    end
+
+    User([👤 User]) --> NGINX
+
+    NGINX --> Wagtail
+    NGINX --> NextJS
+
+    Wagtail -- "CMS Content (read-only)" --> NextJS
+    Wagtail -- "Editorial Media References" --> AppAPI
+
+    NextJS --> APIClient
+    NextJS --> CheckoutFlow
+    NextJS --> NextAuth
+    NextJS --> MediaLayer
+    NextAuth --> SessionStore
+
+    APIClient --> AppAPI
+    AppAPI --> Django
+
+    Django --> Postgres
+    Django --> Redis
+    Django --> StripeBack
+    Django --> CloudBack
+    Django --> Allauth
+    Wagtail --> Django
+
+    StripeBack --> StripeExt
+    CheckoutFlow --> StripeExt
+    CloudBack --> CloudinaryExt
+    MediaLayer --> CloudinaryExt
+
+    Allauth --> GoogleOAuth
+    Allauth --> GitHubOAuth
+    Allauth --> EmailMagic
+
+    style User fill:#ff6b6b,color:#fff
+    style NGINX fill:#ff4444,color:#fff
+    style Wagtail fill:#9b59b6,color:#fff
+    style NextJS fill:#f39c12,color:#fff
+    style APIClient fill:#e74c3c,color:#fff
+    style CheckoutFlow fill:#e74c3c,color:#fff
+    style NextAuth fill:#f39c12,color:#fff
+    style MediaLayer fill:#f39c12,color:#fff
+    style SessionStore fill:#f39c12,color:#fff
+    style AppAPI fill:#27ae60,color:#fff
+    style Django fill:#9b59b6,color:#fff
+    style StripeBack fill:#27ae60,color:#fff
+    style CloudBack fill:#f1c40f,color:#000
+    style Allauth fill:#27ae60,color:#fff
+    style Postgres fill:#27ae60,color:#fff
+    style Redis fill:#27ae60,color:#fff
+    style StripeExt fill:#6c5ce7,color:#fff
+    style CloudinaryExt fill:#fdcb6e,color:#000
+    style GoogleOAuth fill:#00b894,color:#fff
+    style GitHubOAuth fill:#00b894,color:#fff
+    style EmailMagic fill:#00b894,color:#fff
+    style Datadog fill:#636e72,color:#fff
+    style GHA fill:#636e72,color:#fff
+    style Docker fill:#636e72,color:#fff
+```
 
 ### System Layers
 
@@ -89,11 +199,24 @@ Nordic Stage is a scalable event platform providing:
 ```
 nordic-stage/
 ├── apps/
-│   ├── api/          # Django backend
-│   └── web/          # Next.js frontend
-├── infra/            # Docker, NGINX config
-├── docs/             # Architecture, runbooks
-└── readme/           # Assets
+│   ├── api/
+│   │   ├── config/          # Django project config (settings, urls, ASGI)
+│   │   ├── accounts/        # User and authentication domain
+│   │   ├── events/          # Events, speakers, sessions
+│   │   ├── registrations/   # Bookings and saved sessions
+│   │   ├── payments/        # Stripe integration and orders
+│   │   ├── cms/             # Wagtail CMS models and blocks
+│   │   ├── media/           # Cloudinary integration
+│   │   ├── core/            # Shared backend utilities
+│   │   └── manage.py
+│   └── web/
+│       ├── app/
+│       ├── components/
+│       ├── features/
+│       ├── lib/
+│       └── types/
+├── infra/
+├── docs/
 ```
 
 ---
@@ -204,12 +327,48 @@ cd apps/web && bun run dev
 ## Documentation
 
 - `docs/architecture/` — Design decisions and diagrams
-- `docs/milestones/` — Milestone specifications
 - `docs/api/` — API contracts and OpenAPI docs
 - `docs/runbooks/` — Operational procedures
+
+### Milestones
+
+#### Infrastructure
+
+| Milestone | Description |
+|-----------|-------------|
+| [I1 — Monorepo Setup](docs/milestones/infra/I1-monorepo.md) | Project structure and tooling |
+| [I2 — Docker & NGINX](docs/milestones/infra/I2-docker-nginx.md) | Containerization and reverse proxy |
+| [I3 — Database & Redis](docs/milestones/infra/I3-database-redis.md) | PostgreSQL and cache layer |
+| [I4 — CI/CD & Observability](docs/milestones/infra/I4-ci-cd-observability.md) | GitHub Actions and Datadog |
+
+#### Backend
+
+| Milestone | Description |
+|-----------|-------------|
+| [B1 — Core Foundation](docs/milestones/backend/B1-core-foundation.md) | Django project setup and base config |
+| [B2 — Domain Models](docs/milestones/backend/B2-domain-models.md) | Events, speakers, sessions, venues |
+| [B3 — CMS (Wagtail)](docs/milestones/backend/B3-cms-wagtail.md) | Editorial content and page models |
+| [B4 — API Layer](docs/milestones/backend/B4-api-layer.md) | REST endpoints and contracts |
+| [B5 — Authentication](docs/milestones/backend/B5-authentication.md) | django-allauth and OAuth backends |
+| [B6 — Payments (Stripe)](docs/milestones/backend/B6-payments-stripe.md) | Checkout sessions and webhooks |
+| [B7 — Media (Cloudinary)](docs/milestones/backend/B7-media-cloudinary.md) | Upload, storage, and metadata |
+| [B8 — Performance & Security](docs/milestones/backend/B8-performance-security.md) | Caching, rate limiting, hardening |
+| [B9 — Search](docs/milestones/backend/B9-search.md) | Event and content search |
+
+#### Frontend
+
+| Milestone | Description |
+|-----------|-------------|
+| [F1 — Foundation](docs/milestones/frontend/F1-foundation.md) | Next.js setup and design system |
+| [F2 — Public Pages](docs/milestones/frontend/F2-public-pages.md) | Landing, discovery, and static pages |
+| [F3 — Event Experience](docs/milestones/frontend/F3-event-experience.md) | Event detail, agenda, speakers |
+| [F4 — Registration Flow](docs/milestones/frontend/F4-registration-flow.md) | Booking and checkout UX |
+| [F5 — Account Area](docs/milestones/frontend/F5-account-area.md) | User dashboard and saved sessions |
+| [F6 — Performance & SEO](docs/milestones/frontend/F6-performance-seo.md) | Core Web Vitals and metadata |
+| [F7 — Analytics](docs/milestones/frontend/F7-analytics.md) | Tracking and event instrumentation |
 
 ---
 
 ## License
 
-MIT — see LICENSE
+MIT — see [LICENSE](LICENSE)
