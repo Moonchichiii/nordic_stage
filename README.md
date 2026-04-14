@@ -9,6 +9,7 @@ A production-grade event platform with modern fullstack architecture.
 **Current Phase:** Planning and Architecture
 
 This repository focuses on foundational work:
+
 - Architecture design and system contracts
 - Milestone planning and issue breakdown
 - Infrastructure strategy
@@ -21,6 +22,7 @@ Implementation begins after architecture completion.
 ## Vision
 
 Nordic Stage is a scalable event platform providing:
+
 - Event discovery and browsing
 - Agenda and speaker/venue pages
 - Secure ticket purchases and payments
@@ -31,6 +33,7 @@ Nordic Stage is a scalable event platform providing:
 ---
 
 ## Architecture
+
 ```mermaid
 flowchart TD
     subgraph External Identity Providers
@@ -147,7 +150,7 @@ flowchart TD
 ### System Layers
 
 | Component | Role |
-|-----------|------|
+| --- | --- |
 | **NGINX** | Ingress, reverse proxy, edge caching |
 | **Next.js** | Frontend (App Router) |
 | **API Client** | Typed fetch and validation layer |
@@ -176,7 +179,7 @@ flowchart TD
 ## Technology Stack
 
 | Layer | Technology | Version |
-|-------|-----------|---------|
+| --- | --- | --- |
 | Frontend | Next.js | 16.2.3 |
 | Backend | Django | 6.0.4 |
 | CMS | Wagtail | 7.4 LTS |
@@ -196,7 +199,7 @@ flowchart TD
 
 ## Monorepo Structure
 
-```
+```bash
 nordic-stage/
 ├── apps/
 │   ├── api/
@@ -228,9 +231,9 @@ nordic-stage/
 **Frontend** · Next.js architecture, discovery, registration UX  
 **Authentication** · Session flow, OAuth, magic links  
 **Payments** · Stripe checkout, webhooks, order lifecycle  
-**Media** · Cloudinary integration, image/video delivery  
+**Media** · Cloudinary integration, image/video delivery
 
-**Total: 18 planned milestones**
+## Total: 18 planned milestones
 
 ---
 
@@ -266,26 +269,30 @@ cd apps/web && bun run dev
 ```
 
 **Local Endpoints:**
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- Wagtail Admin: http://localhost:8000/admin
+
+- Frontend: <http://localhost:3000>
+- Backend: <http://localhost:8000>
+- Wagtail Admin: <http://localhost:8000/admin>
 
 ---
 
 ## Security
 
 ### Authentication
+
 - Frontend sessions via NextAuth.js
 - Backend identity via django-allauth
 - OAuth 2.0 (GitHub, Google) + email magic links
 
 ### Platform
+
 - NGINX security headers and rate limiting
 - Input validation at API boundary
 - Typed frontend contract validation
 - Environment-based secret management
 
 ### Rate Limits
+
 - Public API: 100 req/s per IP
 - Registration: 5 req/min per IP
 - Admin routes: Protected access
@@ -295,6 +302,7 @@ cd apps/web && bun run dev
 ## Deployment
 
 ### Architecture
+
 - NGINX ingress and edge cache
 - Next.js frontend runtime
 - Django + Wagtail backend runtime
@@ -306,6 +314,7 @@ cd apps/web && bun run dev
 - Datadog observability
 
 ### Environments
+
 - Local development
 - Staging
 - Production
@@ -335,7 +344,7 @@ cd apps/web && bun run dev
 #### Infrastructure
 
 | Milestone | Description |
-|-----------|-------------|
+| --- | --- |
 | [I1 — Monorepo Setup](docs/milestones/infra/I1-monorepo.md) | Project structure and tooling |
 | [I2 — Docker & NGINX](docs/milestones/infra/I2-docker-nginx.md) | Containerization and reverse proxy |
 | [I3 — Database & Redis](docs/milestones/infra/I3-database-redis.md) | PostgreSQL and cache layer |
@@ -344,7 +353,7 @@ cd apps/web && bun run dev
 #### Backend
 
 | Milestone | Description |
-|-----------|-------------|
+| --- | --- |
 | [B1 — Core Foundation](docs/milestones/backend/B1-core-foundation.md) | Django project setup and base config |
 | [B2 — Domain Models](docs/milestones/backend/B2-domain-models.md) | Events, speakers, sessions, venues |
 | [B3 — CMS (Wagtail)](docs/milestones/backend/B3-cms-wagtail.md) | Editorial content and page models |
@@ -358,7 +367,7 @@ cd apps/web && bun run dev
 #### Frontend
 
 | Milestone | Description |
-|-----------|-------------|
+| --- | --- |
 | [F1 — Foundation](docs/milestones/frontend/F1-foundation.md) | Next.js setup and design system |
 | [F2 — Public Pages](docs/milestones/frontend/F2-public-pages.md) | Landing, discovery, and static pages |
 | [F3 — Event Experience](docs/milestones/frontend/F3-event-experience.md) | Event detail, agenda, speakers |

@@ -19,6 +19,7 @@ Each milestone:
 - F* → Frontend
 
 Example:
+
 - I1 — Monorepo Setup
 - B2 — Domain Models
 - F3 — Event Experience
