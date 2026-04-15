@@ -61,7 +61,7 @@ bun.lockb
 # Nginx
 nginx.conf.bak
 *.pid
-*.lock
+nginx.lock
 
 # OS
 .DS_Store
