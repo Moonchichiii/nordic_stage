@@ -22,4 +22,3 @@ class BaseSelector(Generic[T]):
         or a formatted dictionary instead of a queryset.
         """
         return self.get_queryset()
-        return self.get_queryset()

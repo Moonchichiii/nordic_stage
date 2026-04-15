@@ -3,35 +3,32 @@ import uuid
 from typing import Callable
 
 import structlog
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
 logger = structlog.get_logger(__name__)
 
-
 class RequestIDMiddleware:
-    """
-    Ensures every request has a unique ID for distributed tracing.
-    Binds the request ID to the structured logger.
-    """
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        # Get from load balancer/proxy, or generate a new one
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.request_id = request_id  # type: ignore
 
-        # Bind the request ID to all logs generated during this request
         with structlog.contextvars.bound_contextvars(request_id=request_id):
             response = self.get_response(request)
 
-        # Return the ID to the client
         response["X-Request-ID"] = request_id
         return response
 
 
 class TimingMiddleware:
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
@@ -46,5 +43,29 @@ class TimingMiddleware:
             status=response.status_code,
             duration_s=round(duration, 4),
         )
+
+        return response
+
+
+class CSPMiddleware:
+    """
+    Injects the Content-Security-Policy header into every response.
+    """
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        response = self.get_response(request)
+
+        csp = getattr(
+            settings,
+            "SECURE_CONTENT_SECURITY_POLICY",
+            "default-src 'self'; frame-ancestors 'none';"
+        )
+
+        if "Content-Security-Policy" not in response:
+            response["Content-Security-Policy"] = csp
 
         return response

@@ -31,11 +31,25 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.TimingMiddleware',
     'core.middleware.RequestIDMiddleware',
+    'core.middleware.CSPMiddleware',
 ]
+
+LOGIN_URL = "/api/auth/login/"
+
+# Content Security Policy (CSP) - Native Django 6.0+
+SECURE_CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data:; "
+    "font-src 'self' data:; "
+    "frame-ancestors 'none';"
+)
 
 ROOT_URLCONF = 'config.urls'
 
