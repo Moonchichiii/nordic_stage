@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.db import transaction
 
@@ -9,7 +9,7 @@ class BaseService:
     Encapsulates complex logic to keep models and views thin.
     """
 
-    def __init__(self, user: Optional[Any] = None) -> None:
+    def __init__(self, user: Any | None = None) -> None:
         self.user = user
 
     def pre_execute(self) -> None:
