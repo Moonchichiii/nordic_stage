@@ -77,3 +77,10 @@ packages = ["config"]
 dev = [
     "pytest-cov>=7.1.0",
 ]
+
+[tool.coverage.run]
+omit = [
+    "manage.py",
+    "config/*",
+    "*/migrations/*",
+]
