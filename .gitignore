@@ -95,3 +95,4 @@ htmlcov/
 .eslintcache
 *.rar
 *.zip
+.env.example

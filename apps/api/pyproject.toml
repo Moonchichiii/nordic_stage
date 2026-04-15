@@ -20,6 +20,9 @@ dependencies = [
     "stripe>=11.0.0",
     "cloudinary>=1.41.0",
     "gunicorn>=25.3.0",
+    "dj-database-url>=3.1.2",
+    "ddtrace>=4.7.0",
+    "structlog>=25.5.0",
 ]
 
 [project.optional-dependencies]
@@ -61,9 +64,14 @@ plugins = ["mypy_django_plugin.main"]
 django_settings_module = "config.settings"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings"
+DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-addopts = "-v --nomigrations"
+addopts = "-v --nomigrations --cov=. --cov-report=term-missing --cov-fail-under=90"
 
 [tool.hatch.build.targets.wheel]
 packages = ["config"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]

@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Uses Bun to parse package.json and bun.lockb
+  - package-ecosystem: "bun"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      
+  # "pip" is Dependabot's ecosystem name for all Python projects (reads pyproject.toml)
+  - package-ecosystem: "pip"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
