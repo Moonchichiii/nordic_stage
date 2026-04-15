@@ -59,6 +59,8 @@ ignore = []
 python_version = "3.13"
 strict = true
 plugins = ["mypy_django_plugin.main"]
+mypy_path = "."
+explicit_package_bases = true
 
 [tool.django-stubs]
 django_settings_module = "config.settings"

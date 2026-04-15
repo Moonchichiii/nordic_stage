@@ -2,7 +2,7 @@ from pathlib import Path
 
 import dj_database_url
 import structlog
-from decouple import Csv, config
+from decouple import Csv, config  # type: ignore[import-untyped]
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
