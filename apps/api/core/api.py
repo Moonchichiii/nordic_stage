@@ -1,8 +1,9 @@
 from typing import Any
 
-from core.exceptions import ApplicationError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+
+from core.exceptions import ApplicationError
 
 
 def custom_exception_handler(

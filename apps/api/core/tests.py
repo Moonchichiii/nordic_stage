@@ -1,9 +1,9 @@
 import pytest
-from core.selectors import BaseSelector
 
 from core.api import custom_exception_handler
 from core.exceptions import ApplicationError
 from core.models import TimeStampedModel, UUIDModel
+from core.selectors import BaseSelector
 from core.services import BaseService
 
 
