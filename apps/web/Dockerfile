@@ -1,5 +1,3 @@
-# apps/web/Dockerfile
-
 # Stage 1: Dependencies
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
