@@ -1,4 +1,11 @@
 import pytest
+<<<<<<< HEAD
+=======
+
+from core.models import TimeStampedModel, UUIDModel
+from core.selectors import BaseSelector
+from core.selectors import BaseSelector
+>>>>>>> f9ea1de87fbd5fa7c6b93182167434aab65d0758
 
 from core.api import custom_exception_handler
 from core.exceptions import ApplicationError
@@ -12,6 +19,12 @@ def test_models_are_abstract() -> None:
     assert UUIDModel._meta.abstract is True
     assert TimeStampedModel._meta.abstract is True
 
+def test_base_selector_raises_not_implemented() -> None:
+    """Ensure the base selector enforces the get_queryset method."""
+    selector = BaseSelector()
+
+    with pytest.raises(NotImplementedError):
+        selector.execute()
 
 @pytest.mark.django_db
 def test_base_service_raises_not_implemented() -> None:
