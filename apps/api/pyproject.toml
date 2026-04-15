@@ -10,17 +10,16 @@ dependencies = [
     "Django>=6.0.4",
     "wagtail>=7.3",
     "djangorestframework>=3.15",
-    
     # Infrastructure & Data
     "psycopg[binary]>=3.0",
     "python-decouple>=3.8",
     "redis>=5.0.0",
     "django-redis>=5.4.0",
-    
     # External Services
     "django-allauth>=0.63.0",
     "stripe>=11.0.0",
     "cloudinary>=1.41.0",
+    "gunicorn>=25.3.0",
 ]
 
 [project.optional-dependencies]

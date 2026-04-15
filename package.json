@@ -2,9 +2,16 @@
   "name": "nordic-stage-monorepo",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
     "dev:web": "cd apps/web && bun run dev",
-    "dev:api": "cd apps/api && uv run python manage.py runserver"
+    "dev:api": "cd apps/api && uv run python manage.py runserver",
+    "format": "biome format --write .",
+    "lint": "biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.12"
   }
 }
