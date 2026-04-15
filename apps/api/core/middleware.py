@@ -13,7 +13,9 @@ class RequestIDMiddleware:
     Ensures every request has a unique ID for distributed tracing.
     Binds the request ID to the structured logger.
     """
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
@@ -31,7 +33,9 @@ class RequestIDMiddleware:
 
 
 class TimingMiddleware:
-    def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
