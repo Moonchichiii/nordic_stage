@@ -1,0 +1,20 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    name: Staging Deployment
+    runs-on: ubuntu-latest
+    # In a real scenario, this would wait for a separate testing workflow
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deployment Placeholder
+        run: |
+          echo "Triggering deployment to staging environment..."
+          echo "TODO: Add actual deployment scripts (e.g., SSH, Docker Swarm, or AWS ECS update)"
