@@ -9,3 +9,7 @@ DATABASES = {
         "NAME": ":memory:",
     }
 }
+
+# Execute Celery tasks synchronously in tests
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True

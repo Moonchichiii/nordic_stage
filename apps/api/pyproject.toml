@@ -23,6 +23,7 @@ dependencies = [
     "dj-database-url>=3.1.2",
     "ddtrace>=4.7.0",
     "structlog>=25.5.0",
+    "celery[redis]>=5.4",
 ]
 
 [project.optional-dependencies]
@@ -75,6 +76,7 @@ packages = ["config"]
 
 [dependency-groups]
 dev = [
+    "djangorestframework-stubs>=3.16",
     "pytest-cov>=7.1.0",
 ]
 
@@ -84,3 +86,7 @@ omit = [
     "config/*",
     "*/migrations/*",
 ]
+
+[[tool.mypy.overrides]]
+module = ["celery.*"]
+ignore_missing_imports = true

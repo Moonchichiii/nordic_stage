@@ -12,19 +12,21 @@ from core.middleware import CSPMiddleware, RequestIDMiddleware, TimingMiddleware
 from core.models import TimeStampedModel, UUIDModel
 from core.selectors import BaseSelector
 from core.services import BaseService
+from core.tasks import BaseTask, debug_task, send_email_task
 from core.utils import generate_unique_slug, get_client_ip
 
 
+# Models Tests
 def test_models_are_abstract() -> None:
     """Ensure our base domain models remain abstract."""
     assert UUIDModel._meta.abstract is True
     assert TimeStampedModel._meta.abstract is True
 
 
+# Base Classes Tests
 def test_base_selector_raises_not_implemented() -> None:
     """Ensure the base selector enforces the get_queryset method."""
     selector: BaseSelector[Any] = BaseSelector()
-
     with pytest.raises(NotImplementedError):
         selector.execute()
 
@@ -33,10 +35,10 @@ def test_base_service_raises_not_implemented() -> None:
     """Ensure the base service enforces the execute method."""
     service = BaseService()
     with pytest.raises(NotImplementedError):
-        # Call execute directly to avoid @transaction.atomic triggers
         service.execute()
 
 
+# Exception Tests
 def test_application_error_initialization() -> None:
     """Ensure the base ApplicationError stores message and extra data."""
     error = ApplicationError("Something went wrong", extra={"code": 123})
@@ -55,6 +57,7 @@ def test_custom_exception_handler_application_error() -> None:
     assert response.data["message"] == "Domain failed"
 
 
+# Middleware Tests
 def test_request_id_middleware_generates_id() -> None:
     """Ensure RequestIDMiddleware assigns an ID and returns it in headers."""
     factory = RequestFactory()
@@ -68,7 +71,7 @@ def test_request_id_middleware_generates_id() -> None:
     response = middleware(request)
 
     assert "X-Request-ID" in response
-    assert response["X-Request-ID"] == request.request_id
+    assert response["X-Request-ID"] == getattr(request, "request_id", None)
 
 
 def test_request_id_middleware_uses_existing_id() -> None:
@@ -77,7 +80,7 @@ def test_request_id_middleware_uses_existing_id() -> None:
     request = factory.get("/", HTTP_X_REQUEST_ID="custom-1234")
 
     def get_response(req: Any) -> HttpResponse:
-        assert req.request_id == "custom-1234"
+        assert getattr(req, "request_id", None) == "custom-1234"
         return HttpResponse("OK")
 
     middleware = RequestIDMiddleware(get_response)
@@ -106,6 +109,22 @@ def test_timing_middleware_logs_duration() -> None:
     assert "duration_s" in cap_logs[0]
 
 
+def test_csp_middleware_sets_header() -> None:
+    """Ensure custom CSPMiddleware applies the CSP header."""
+    factory = RequestFactory()
+    request = factory.get("/")
+
+    def get_response(req: Any) -> HttpResponse:
+        return HttpResponse("OK")
+
+    middleware = CSPMiddleware(get_response)
+    response = middleware(request)
+
+    assert "Content-Security-Policy" in response
+    assert "default-src 'self'" in response["Content-Security-Policy"]
+
+
+# Utility Tests
 def test_get_client_ip_x_forwarded() -> None:
     """Ensure we get the first IP from X-Forwarded-For if present."""
     factory = RequestFactory()
@@ -148,16 +167,39 @@ def test_generate_unique_slug_with_collisions(mock_model: MagicMock) -> None:
     assert mock_model.objects.filter.call_count == 3
 
 
-def test_csp_middleware_sets_header() -> None:
-    """Ensure custom CSPMiddleware applies the CSP header."""
-    factory = RequestFactory()
-    request = factory.get("/")
+# Task Tests
+def test_debug_task() -> None:
+    """Ensure debug task runs and returns pong."""
+    assert debug_task() == "pong"
 
-    def get_response(req: Any) -> HttpResponse:
-        return HttpResponse("OK")
 
-    middleware = CSPMiddleware(get_response)
-    response = middleware(request)
+def test_send_email_task() -> None:
+    """Ensure the placeholder email task works properly."""
+    result = send_email_task("test@example.com", "Hello", "This is a test body")
+    assert result is True
 
-    assert "Content-Security-Policy" in response
-    assert "default-src 'self'" in response["Content-Security-Policy"]
+
+def test_basetask_on_failure() -> None:
+    """Ensure the BaseTask logs errors appropriately on failure."""
+    task = BaseTask()
+    task.name = "test_task"
+
+    with structlog.testing.capture_logs() as cap_logs:
+        task.on_failure(Exception("Test error"), "123", (), {}, None)
+
+    assert len(cap_logs) == 1
+    assert cap_logs[0]["event"] == "task_failed"
+    assert cap_logs[0]["task_name"] == "test_task"
+
+
+def test_basetask_on_success() -> None:
+    """Ensure the BaseTask logs successes appropriately."""
+    task = BaseTask()
+    task.name = "test_task"
+
+    with structlog.testing.capture_logs() as cap_logs:
+        task.on_success("retval", "123", (), {})
+
+    assert len(cap_logs) == 1
+    assert cap_logs[0]["event"] == "task_succeeded"
+    assert cap_logs[0]["task_name"] == "test_task"
