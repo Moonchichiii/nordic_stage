@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 
-from accounts.models import User
+from accounts.models import Profile, User
 
 
 def get_user_model_class() -> type[User]:
@@ -84,3 +84,51 @@ def test_string_representation_returns_username() -> None:
     )
 
     assert str(user) == "displayname"
+
+
+@pytest.mark.django_db
+def test_profile_can_be_created() -> None:
+    user_model = get_user_model_class()
+    user = user_model.objects.create_user(
+        username="profileuser",
+        email="profile@example.com",
+        password="super-secret-123",
+    )
+
+    profile = Profile(user=user, display_name="My Profile")
+    profile.save()
+
+    assert profile.user == user
+    assert profile.display_name == "My Profile"
+    assert hasattr(user, "profile")
+    assert user.profile == profile
+
+
+@pytest.mark.django_db
+def test_profile_str_returns_display_name() -> None:
+    user_model = get_user_model_class()
+    user = user_model.objects.create_user(
+        username="john_doe",
+        email="john@example.com",
+        password="super-secret-123",
+    )
+
+    profile = Profile(user=user, display_name="John Doe")
+    profile.save()
+
+    assert str(profile) == "John Doe"
+
+
+@pytest.mark.django_db
+def test_profile_str_falls_back_to_username() -> None:
+    user_model = get_user_model_class()
+    user = user_model.objects.create_user(
+        username="jane_doe",
+        email="jane@example.com",
+        password="super-secret-123",
+    )
+
+    profile = Profile(user=user, display_name="")
+    profile.save()
+
+    assert str(profile) == "jane_doe"
