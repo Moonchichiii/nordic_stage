@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "core",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -38,6 +39,10 @@ MIDDLEWARE = [
 ]
 
 LOGIN_URL = "/api/auth/login/"
+
+
+# Custom user model
+AUTH_USER_MODEL = "accounts.User"
 
 # Content Security Policy (CSP) - Native Django 6.0+
 SECURE_CONTENT_SECURITY_POLICY = (
