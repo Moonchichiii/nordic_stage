@@ -16,6 +16,7 @@ class User(AbstractUser, UUIDModel, TimeStampedModel):
 
 
 class Profile(BaseDomainModel):
+    objects = models.Manager["Profile"]()
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
