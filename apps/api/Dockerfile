@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy pyproject.toml to install dependencies
-COPY pyproject.toml ./
+# Copy dependency metadata and lockfile
+COPY pyproject.toml uv.lock ./
 
 # Sync dependencies (creates a virtual environment at /app/.venv)
 RUN uv sync --frozen --no-install-project --no-dev

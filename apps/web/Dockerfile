@@ -1,16 +1,17 @@
 # Stage 1: Dependencies
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
+
 COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Builder
 FROM oven/bun:1-alpine AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js standalone build relies on this
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN bun run build
@@ -19,8 +20,13 @@ RUN bun run build
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+
+# Refresh base packages to pick up patched Alpine packages
+RUN apk update && apk upgrade --no-cache
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
@@ -30,7 +36,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 RUN mkdir .next && chown nextjs:nodejs .next
 
 # Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -38,7 +43,5 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 USER nextjs
 
 EXPOSE 3000
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
 CMD ["bun", "server.js"]
