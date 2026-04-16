@@ -41,8 +41,8 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 80
-# Updated target version to match Python 3.13
 target-version = "py313"
+exclude = ["*/migrations/*.py"]
 
 [tool.ruff.lint]
 select = [
@@ -69,7 +69,8 @@ django_settings_module = "config.settings"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
-addopts = "-v --nomigrations --cov=. --cov-report=term-missing --cov-fail-under=90"
+addopts = "--ds=config.settings.test -v --nomigrations --cov=. --cov-report=term-missing --cov-fail-under=90"
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["config"]
