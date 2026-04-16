@@ -8,6 +8,7 @@ from django.http import HttpRequest, HttpResponse
 
 logger = structlog.get_logger(__name__)
 
+
 class RequestIDMiddleware:
     def __init__(
         self, get_response: Callable[[HttpRequest], HttpResponse]
@@ -51,6 +52,7 @@ class CSPMiddleware:
     """
     Injects the Content-Security-Policy header into every response.
     """
+
     def __init__(
         self, get_response: Callable[[HttpRequest], HttpResponse]
     ) -> None:
@@ -62,7 +64,7 @@ class CSPMiddleware:
         csp = getattr(
             settings,
             "SECURE_CONTENT_SECURITY_POLICY",
-            "default-src 'self'; frame-ancestors 'none';"
+            "default-src 'self'; frame-ancestors 'none';",
         )
 
         if "Content-Security-Policy" not in response:
