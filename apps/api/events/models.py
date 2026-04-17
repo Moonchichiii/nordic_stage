@@ -217,3 +217,32 @@ class Waitlist(BaseDomainModel):
 
     def __str__(self) -> str:
         return f"{self.full_name} - {self.event.name}"
+
+
+class OrderStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    PAID = "paid", "Paid"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+class Order(BaseDomainModel):
+    objects: ClassVar[models.Manager["Order"]] = models.Manager()
+
+    registration = models.OneToOneField(
+        Registration,
+        on_delete=models.CASCADE,
+        related_name="order",
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default="EUR")
+    status = models.CharField(
+        max_length=20,
+        choices=OrderStatus.choices,
+        default=OrderStatus.PENDING,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.registration.full_name} - {self.amount} {self.currency}"
