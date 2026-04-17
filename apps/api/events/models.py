@@ -156,3 +156,30 @@ class Registration(BaseDomainModel):
 
     def __str__(self) -> str:
         return f"{self.full_name} - {self.event.name}"
+
+class TicketStatus(models.TextChoices):
+    ACTIVE = "active", "Active"
+    CANCELLED = "cancelled", "Cancelled"
+    USED = "used", "Used"
+
+
+class Ticket(BaseDomainModel):
+    objects: ClassVar[models.Manager["Ticket"]] = models.Manager()
+
+    registration = models.OneToOneField(
+        Registration,
+        on_delete=models.CASCADE,
+        related_name="ticket",
+    )
+    code = models.CharField(max_length=64, unique=True)
+    status = models.CharField(
+        max_length=20,
+        choices=TicketStatus.choices,
+        default=TicketStatus.ACTIVE,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.code
