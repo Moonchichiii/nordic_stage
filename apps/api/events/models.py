@@ -53,3 +53,19 @@ class Speaker(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.full_name
+
+class Session(BaseDomainModel):
+    objects: ClassVar[models.Manager["Session"]] = models.Manager()
+
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField()
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["start_at"]
+
+    def __str__(self) -> str:
+        return self.title
