@@ -37,3 +37,19 @@ class Venue(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.name
+
+class Speaker(BaseDomainModel):
+    objects: ClassVar[models.Manager["Speaker"]] = models.Manager()
+
+    full_name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    bio = models.TextField(blank=True)
+    job_title = models.CharField(max_length=255, blank=True)
+    company_name = models.CharField(max_length=255, blank=True)
+    is_published = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["full_name"]
+
+    def __str__(self) -> str:
+        return self.full_name
