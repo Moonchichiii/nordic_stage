@@ -757,19 +757,15 @@ dependencies = [
     { name = "wagtail" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "django-stubs" },
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-django" },
-    { name = "ruff" },
-]
-
 [package.dev-dependencies]
 dev = [
+    { name = "django-stubs" },
     { name = "djangorestframework-stubs" },
+    { name = "mypy" },
+    { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "pytest-django" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -781,26 +777,25 @@ requires-dist = [
     { name = "django", specifier = ">=6.0.4" },
     { name = "django-allauth", specifier = ">=0.63.0" },
     { name = "django-redis", specifier = ">=5.4.0" },
-    { name = "django-stubs", marker = "extra == 'dev'", specifier = ">=4.2" },
     { name = "djangorestframework", specifier = ">=3.15" },
     { name = "gunicorn", specifier = ">=25.3.0" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.9" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-django", marker = "extra == 'dev'", specifier = ">=4.8" },
     { name = "python-decouple", specifier = ">=3.8" },
     { name = "redis", specifier = ">=5.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3" },
     { name = "stripe", specifier = ">=11.0.0" },
     { name = "structlog", specifier = ">=25.5.0" },
     { name = "wagtail", specifier = ">=7.3" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "django-stubs", specifier = ">=4.2" },
     { name = "djangorestframework-stubs", specifier = ">=3.16" },
+    { name = "mypy", specifier = ">=1.9" },
+    { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
+    { name = "pytest-django", specifier = ">=4.8" },
+    { name = "ruff", specifier = ">=0.3" },
 ]
 
 [[package]]

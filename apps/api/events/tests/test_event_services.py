@@ -142,4 +142,3 @@ def test_update_event_does_not_create_new_instance() -> None:
 
     assert Event.objects.count() == 1
     assert updated.id == event.id
-
