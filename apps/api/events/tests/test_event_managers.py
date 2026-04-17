@@ -72,3 +72,27 @@ def test_event_manager_past_returns_only_finished_events() -> None:
     events = Event.objects.past()
 
     assert list(events) == [past_event]
+
+
+@pytest.mark.django_db
+def test_event_manager_chaining() -> None:
+    now = timezone.now()
+
+    Event.objects.create(
+        name="Published Future",
+        slug="pf",
+        start_at=now + timedelta(days=1),
+        end_at=now + timedelta(days=2),
+        is_published=True,
+    )
+    Event.objects.create(
+        name="Draft Future",
+        slug="df",
+        start_at=now + timedelta(days=1),
+        end_at=now + timedelta(days=2),
+        is_published=False,
+    )
+
+    events = Event.objects.published().upcoming()
+
+    assert events.count() == 1

@@ -121,3 +121,10 @@ def test_get_event_by_slug_returns_correct_event() -> None:
 
     assert result is not None
     assert result.id == event.id
+
+
+@pytest.mark.django_db
+def test_get_published_events_empty() -> None:
+    events = get_published_events()
+
+    assert events.count() == 0

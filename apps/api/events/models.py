@@ -1,5 +1,6 @@
 from typing import ClassVar, Self
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import functions
 
@@ -46,6 +47,14 @@ class Event(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def clean(self) -> None:
+        super().clean()
+        if self.start_at and self.end_at and self.start_at > self.end_at:
+            raise ValidationError(
+                {"end_at": "Event end time cannot be before the start time."}
+            )
+
 
 class Venue(BaseDomainModel):
     objects: ClassVar[models.Manager["Venue"]] = models.Manager()

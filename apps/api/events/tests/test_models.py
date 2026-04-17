@@ -1,6 +1,8 @@
 import uuid
+from datetime import timedelta
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Manager
 from django.utils import timezone
@@ -80,3 +82,37 @@ def test_event_string_representation_returns_name() -> None:
     )
 
     assert str(event) == "String Event"
+
+
+@pytest.mark.django_db
+def test_event_start_must_be_before_end() -> None:
+    now = timezone.now()
+
+    event = Event(
+        name="Invalid Event",
+        slug="invalid-event",
+        start_at=now,
+        end_at=now - timedelta(hours=1),
+    )
+
+    with pytest.raises(ValidationError):
+        event.full_clean()
+
+
+@pytest.mark.django_db
+def test_event_slug_is_case_sensitive_unique() -> None:
+    now = timezone.now()
+
+    get_event_manager().create(
+        name="Event A",
+        slug="event-a",
+        start_at=now,
+        end_at=now,
+    )
+
+    get_event_manager().create(
+        name="Event B",
+        slug="EVENT-A",
+        start_at=now,
+        end_at=now,
+    )
