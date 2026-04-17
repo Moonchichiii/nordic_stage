@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Any
 
 from core.services import BaseService
-from events.models import Event
+from events.models import Event, Registration
 
 
 class CreateEventService(BaseService):
@@ -65,3 +66,31 @@ class UpdateEventService(BaseService):
         self.event.save()
 
         return self.event
+
+class RegistrationService(BaseService):
+    def create_registration(
+        self,
+        *,
+        event: Event,
+        email: str,
+        full_name: str,
+        status: str = "pending",
+    ) -> Registration:
+        return Registration.objects.create(
+            event=event,
+            email=email,
+            full_name=full_name,
+            status=status,
+        )
+
+    def update_registration(
+        self,
+        *,
+        registration: Registration,
+        **kwargs: Any,
+    ) -> Registration:
+        for field, value in kwargs.items():
+            setattr(registration, field, value)
+
+        registration.save()
+        return registration
