@@ -121,3 +121,38 @@ class Tag(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+class RegistrationStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    CONFIRMED = "confirmed", "Confirmed"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+class Registration(BaseDomainModel):
+    objects: ClassVar[models.Manager["Registration"]] = models.Manager()
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="registrations",
+    )
+    email = models.EmailField()
+    full_name = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=20,
+        choices=RegistrationStatus.choices,
+        default=RegistrationStatus.PENDING,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "email"],
+                name="unique_registration_per_event_email",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.full_name} - {self.event.name}"
