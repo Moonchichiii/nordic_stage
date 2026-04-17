@@ -183,3 +183,37 @@ class Ticket(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.code
+
+class WaitlistStatus(models.TextChoices):
+    WAITING = "waiting", "Waiting"
+    NOTIFIED = "notified", "Notified"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+class Waitlist(BaseDomainModel):
+    objects: ClassVar[models.Manager["Waitlist"]] = models.Manager()
+
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="waitlist_entries",
+    )
+    email = models.EmailField()
+    full_name = models.CharField(max_length=255)
+    status = models.CharField(
+        max_length=20,
+        choices=WaitlistStatus.choices,
+        default=WaitlistStatus.WAITING,
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "email"],
+                name="unique_waitlist_per_event_email",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.full_name} - {self.event.name}"
