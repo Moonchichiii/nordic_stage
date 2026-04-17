@@ -1,12 +1,38 @@
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from django.db import models
+from django.db.models import functions
 
 from core.models import BaseDomainModel
 
 
+class EventQuerySet(models.QuerySet["Event"]):
+    def published(self) -> Self:
+        return self.filter(is_published=True)
+
+    def upcoming(self) -> Self:
+        return self.filter(start_at__gte=functions.Now())
+
+    def past(self) -> Self:
+        return self.filter(end_at__lt=functions.Now())
+
+
+class EventManager(models.Manager["Event"]):
+    def get_queryset(self) -> EventQuerySet:
+        return EventQuerySet(self.model, using=self._db)
+
+    def published(self) -> EventQuerySet:
+        return self.get_queryset().published()
+
+    def upcoming(self) -> EventQuerySet:
+        return self.get_queryset().upcoming()
+
+    def past(self) -> EventQuerySet:
+        return self.get_queryset().past()
+
+
 class Event(BaseDomainModel):
-    objects = models.Manager["Event"]()
+    objects: ClassVar[EventManager] = EventManager()
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
@@ -38,6 +64,7 @@ class Venue(BaseDomainModel):
     def __str__(self) -> str:
         return self.name
 
+
 class Speaker(BaseDomainModel):
     objects: ClassVar[models.Manager["Speaker"]] = models.Manager()
 
@@ -54,6 +81,7 @@ class Speaker(BaseDomainModel):
     def __str__(self) -> str:
         return self.full_name
 
+
 class Session(BaseDomainModel):
     objects: ClassVar[models.Manager["Session"]] = models.Manager()
 
@@ -69,6 +97,7 @@ class Session(BaseDomainModel):
 
     def __str__(self) -> str:
         return self.title
+
 
 class Tag(BaseDomainModel):
     objects: ClassVar[models.Manager["Tag"]] = models.Manager()
