@@ -19,6 +19,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "taggit",
+    "modelcluster",
+    "wagtail.contrib.forms",
+    "wagtail.contrib.redirects",
+    "wagtail.embeds",
+    "wagtail.sites",
+    "wagtail.users",
+    "wagtail.snippets",
+    "wagtail.documents",
+    "wagtail.images",
+    "wagtail.search",
+    "wagtail.admin",
+    "wagtail",
     "rest_framework",
     "core",
     "accounts",
@@ -33,16 +46,19 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     "core.middleware.TimingMiddleware",
     "core.middleware.RequestIDMiddleware",
     "core.middleware.CSPMiddleware",
 ]
 
-LOGIN_URL = "/api/auth/login/"
-
-
 # Custom user model
 AUTH_USER_MODEL = "accounts.User"
+LOGIN_URL = "/api/auth/login/"
+
+# Wagtail settings
+WAGTAIL_SITE_NAME = "Nordic Stage"
+WAGTAILADMIN_BASE_URL = "http://localhost:8000/admin"
 
 # Content Security Policy (CSP) - Native Django 6.0+
 SECURE_CONTENT_SECURITY_POLICY = (
