@@ -117,3 +117,29 @@ def test_update_event_service_persists_changes() -> None:
     assert event.slug == "persisted-event-updated"
     assert event.description == "Now updated"
     assert event.is_published is True
+
+
+@pytest.mark.django_db
+def test_update_event_does_not_create_new_instance() -> None:
+    now = timezone.now()
+
+    event = Event.objects.create(
+        name="Original",
+        slug="original",
+        start_at=now,
+        end_at=now,
+    )
+
+    updated = UpdateEventService(
+        event=event,
+        name="Updated",
+        slug="updated",
+        description="",
+        start_at=now,
+        end_at=now,
+        is_published=True,
+    ).process()
+
+    assert Event.objects.count() == 1
+    assert updated.id == event.id
+
