@@ -246,3 +246,32 @@ class Order(BaseDomainModel):
 
     def __str__(self) -> str:
         return f"{self.registration.full_name} - {self.amount} {self.currency}"
+
+class PaymentEventType(models.TextChoices):
+    CREATED = "created", "Created"
+    UPDATED = "updated", "Updated"
+    SUCCEEDED = "succeeded", "Succeeded"
+    FAILED = "failed", "Failed"
+
+
+class PaymentEvent(BaseDomainModel):
+    objects: ClassVar[models.Manager["PaymentEvent"]] = models.Manager()
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="payment_events",
+    )
+    event_type = models.CharField(
+        max_length=20,
+        choices=PaymentEventType.choices,
+    )
+    provider = models.CharField(max_length=50, default="stripe")
+    provider_event_id = models.CharField(max_length=255, blank=True)
+    payload = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.order.id} - {self.event_type}"
