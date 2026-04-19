@@ -81,3 +81,41 @@ def test_create_stripe_checkout_session_service_logs_payment_event() -> None:
     assert payment_event.provider == "stripe"
     assert payment_event.provider_event_id == "cs_test_456"
     assert payment_event.payload == {"checkout_session_id": "cs_test_456"}
+
+@pytest.mark.django_db
+def test_create_stripe_checkout_session_service_converts_amount_to_minor_units(
+) -> None:
+    order = create_order()
+    gateway = MagicMock()
+    session = SimpleNamespace(id="cs_test_minor")
+    gateway.create_checkout_session.return_value = session
+
+    CreateStripeCheckoutSessionService(
+        order=order,
+        gateway=gateway,
+        success_url="https://example.com/success",
+        cancel_url="https://example.com/cancel",
+    ).process()
+
+    gateway.create_checkout_session.assert_called_once()
+    kwargs = gateway.create_checkout_session.call_args.kwargs
+    assert kwargs["amount"] == 19900
+
+
+@pytest.mark.django_db
+def test_create_stripe_checkout_session_service_creates_single_payment_event(
+) -> None:
+    order = create_order()
+    gateway = MagicMock()
+    gateway.create_checkout_session.return_value = SimpleNamespace(
+        id="cs_test_single"
+    )
+
+    CreateStripeCheckoutSessionService(
+        order=order,
+        gateway=gateway,
+        success_url="https://example.com/success",
+        cancel_url="https://example.com/cancel",
+    ).process()
+
+    assert PaymentEvent.objects.filter(order=order).count() == 1

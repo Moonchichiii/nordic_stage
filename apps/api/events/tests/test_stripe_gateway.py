@@ -42,3 +42,24 @@ def test_retrieve_event_calls_stripe(mock_retrieve: object) -> None:
 
     assert event.id == "evt_123"
     mocked.assert_called_once_with("evt_123")  # type: ignore[attr-defined]
+
+@patch("events.gateways.stripe.checkout.Session.create")
+def test_create_checkout_session_defaults_metadata_to_empty_dict(
+    mock_create: object,
+) -> None:
+    mocked = mock_create
+    assert hasattr(mocked, "return_value")
+    mocked.return_value = SimpleNamespace(id="cs_test_999")
+
+    gateway = StripeGateway(api_key="sk_test_123")
+
+    gateway.create_checkout_session(
+        amount=5000,
+        currency="eur",
+        success_url="https://example.com/success",
+        cancel_url="https://example.com/cancel",
+    )
+
+    mocked.assert_called_once()  # type: ignore[attr-defined]
+    kwargs = mocked.call_args.kwargs  # type: ignore[attr-defined]
+    assert kwargs["metadata"] == {}
