@@ -111,3 +111,4 @@ def test_payment_event_payload_defaults_to_empty_dict() -> None:
     )
 
     assert payment_event.payload == {}
+
