@@ -2,7 +2,14 @@ from datetime import datetime
 from typing import Any
 
 from core.services import BaseService
-from events.models import Event, Registration
+from events.gateways import StripeGateway
+from events.models import (
+    Event,
+    Order,
+    PaymentEvent,
+    PaymentEventType,
+    Registration,
+)
 
 
 class CreateEventService(BaseService):
@@ -67,6 +74,7 @@ class UpdateEventService(BaseService):
 
         return self.event
 
+
 class RegistrationService(BaseService):
     def create_registration(
         self,
@@ -94,3 +102,38 @@ class RegistrationService(BaseService):
 
         registration.save()
         return registration
+
+
+class CreateStripeCheckoutSessionService(BaseService):
+    def __init__(
+        self,
+        *,
+        order: Order,
+        gateway: StripeGateway,
+        success_url: str,
+        cancel_url: str,
+    ) -> None:
+        super().__init__()
+        self.order = order
+        self.gateway = gateway
+        self.success_url = success_url
+        self.cancel_url = cancel_url
+
+    def execute(self) -> Any:
+        session = self.gateway.create_checkout_session(
+            amount=int(self.order.amount * 100),
+            currency=self.order.currency.lower(),
+            success_url=self.success_url,
+            cancel_url=self.cancel_url,
+            metadata={"order_id": str(self.order.id)},
+        )
+
+        PaymentEvent.objects.create(
+            order=self.order,
+            event_type=PaymentEventType.CREATED,
+            provider="stripe",
+            provider_event_id=getattr(session, "id", ""),
+            payload={"checkout_session_id": getattr(session, "id", "")},
+        )
+
+        return session
